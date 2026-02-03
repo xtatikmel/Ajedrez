@@ -26,13 +26,19 @@ class PiezaSombra(pygame.sprite.Sprite):
         es_boss (bool): True solo para Rey Caído (enemigo final)
     """
     
-    def __init__(self, grid_x, grid_y, team, tipo_key):
+    def __init__(self, grid_x, grid_y, team, tipo_key, gestor_recursos=None):
+        """
+        MEJORA 2: Agregar parámetro gestor_recursos para cargar imágenes reales
+        - Si gestor_recursos es None, usa rectángulos de color (legacy)
+        - Si está presente, carga imágenes PNG del ajedrez clásico
+        """
         super().__init__()
         self.grid_x = grid_x
         self.grid_y = grid_y
         self.team = team
         self.tipo = tipo_key
         self.es_boss = False  # Atributo por defecto (solo Rey Caído puede ser True)
+        self.gestor_recursos = gestor_recursos
         
         # Obtener estadísticas RPG según tipo de pieza
         stats = STATS.get(tipo_key, STATS["PEON"])
@@ -41,7 +47,60 @@ class PiezaSombra(pygame.sprite.Sprite):
         self.damage = stats["dmg"]
         self.nombre = stats["name"]
         
-        # Renderización visual: Superficie con color según equipo
+        # MEJORA 3: Cargar imagen real de la pieza o usar rectángulo legacy
+        self._cargar_imagen_pieza()
+        
+        self.rect = self.image.get_rect()
+        self.actualizar_posicion_pixel()
+    
+    def _cargar_imagen_pieza(self):
+        """Carga la imagen de la pieza desde el gestor de recursos o crea un rectángulo."""
+        # MEJORA 4: Si tenemos gestor de recursos, usar imágenes reales
+        if self.gestor_recursos:
+            # Determinar qué imagen cargar según tipo y equipo
+            mapa_imagenes = {
+                "PEON": "PEON",
+                "CABALLO": "CABALLO", 
+                "ALFIL": "ALFIL",
+                "TORRE": "TORRE",
+                "REINA": "REINA",
+                "REY": "REY"
+            }
+            
+            tipo_imagen = mapa_imagenes.get(self.tipo, "PEON")
+            
+            # MEJORA 5: Si es Boss, usar imagen especial boss.png
+            if self.es_boss:
+                clave_imagen = "BOSS"
+            else:
+                # Determinar color según equipo
+                color_equipo = "BLANCO" if self.team == TEAM_PLAYER else "NEGRO"
+                clave_imagen = f"{tipo_imagen}_{color_equipo}"
+            
+            # Intentar obtener imagen del gestor
+            imagen_base = self.gestor_recursos.imagenes.get(clave_imagen)
+            
+            if imagen_base:
+                # MEJORA 6: Crear superficie con espacio para barra de HP
+                self.image = pygame.Surface((TILE_SIZE - 10, TILE_SIZE - 10), pygame.SRCALPHA)
+                self.image.fill((0, 0, 0, 0))  # Transparente
+                
+                # Dibujar imagen de la pieza (escalada)
+                img_escalada = pygame.transform.scale(imagen_base, (TILE_SIZE - 15, TILE_SIZE - 25))
+                self.image.blit(img_escalada, (2, 5))
+                
+                # MEJORA 7: Si es Boss, agregar borde dorado especial
+                if self.es_boss:
+                    pygame.draw.rect(self.image, YELLOW, self.image.get_rect(), 3)
+            else:
+                # Fallback: usar rectángulo de color si no hay imagen
+                self._crear_imagen_legacy()
+        else:
+            # Sin gestor: usar sistema legacy de rectángulos
+            self._crear_imagen_legacy()
+    
+    def _crear_imagen_legacy(self):
+        """Crea imagen legacy con rectángulo de color (sistema antiguo)."""
         self.image = pygame.Surface((TILE_SIZE - 10, TILE_SIZE - 10))
         if self.team == TEAM_PLAYER:
             self.image.fill(BLUE)    # Azul para piezas del jugador
@@ -52,11 +111,8 @@ class PiezaSombra(pygame.sprite.Sprite):
         
         # Etiqueta de tipo de pieza (primera letra)
         font = pygame.font.SysFont("Arial", 14)
-        text = font.render(tipo_key[0], True, WHITE)
+        text = font.render(self.tipo[0], True, WHITE)
         self.image.blit(text, (10, 10))
-        
-        self.rect = self.image.get_rect()
-        self.actualizar_posicion_pixel()
     
     def actualizar_posicion_pixel(self):
         """Actualiza posición visual basada en posición en grid.
