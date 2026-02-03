@@ -17,53 +17,57 @@ from ajedrez_sombras import TableroSombras, IASombras
 
 def main():
     try:
-        # Menú principal: seleccionar modo
-        # CAMBIO 3: Pasar modo="default" (opcional, es el valor por defecto)
-        # Para usar imagen personalizada, cambiar a modo="classic" o modo="soul"
-        menu_principal = Menu([
-            "AJEDREZ CLÁSICO",
-            "AJEDREZ SOMBRAS (RPG)",
-            "Salir"
-        ])
-        modo = menu_principal.loop()
-        
-        # Manejo de salida
-        if modo == "Salir" or modo is None:
-            return
-        
-        # Iniciar modo seleccionado
-        if modo == "AJEDREZ CLÁSICO":
-            # CAMBIO 4: Usar fondo de menú clásico con modo="classic"
-            # Esto cargará la imagen /images/menu_classic.png
-            menu_clasico = Menu([
-                "Jugador vs Jugador",
-                "Partida LAN - Crear Servidor",
-                "Partida LAN - Unirse a Servidor",
-                "Jugador vs Máquina (Stockfish)",
-                "Volver"
-            ], modo="classic")
-            opcion = menu_clasico.loop()
+        # Bucle principal para volver al menú después de cada partida
+        while True:
+            # Menú principal: seleccionar modo
+            # CAMBIO 3: Pasar modo="default" (opcional, es el valor por defecto)
+            # Para usar imagen personalizada, cambiar a modo="classic" o modo="soul"
+            menu_principal = Menu([
+                "AJEDREZ CLÁSICO",
+                "AJEDREZ SOMBRAS (RPG)",
+                "Salir"
+            ])
+            modo = menu_principal.loop()
             
-            if opcion == "Jugador vs Jugador":
-                juego_local()
-            elif opcion == "Partida LAN - Crear Servidor":
-                juego_lan_servidor()
-            elif opcion == "Partida LAN - Unirse a Servidor":
-                juego_lan_cliente()
-            elif opcion == "Jugador vs Máquina (Stockfish)":
-                juego_vs_maquina()
-        
-        elif modo == "AJEDREZ SOMBRAS (RPG)":
-            # CAMBIO 5: Usar fondo de menú sombras con modo="soul"
-            # Esto cargará la imagen /images/menu_soul.png
-            menu_sombras = Menu([
-                "Jugador vs Boss IA",
-                "Volver"
-            ], modo="soul")
-            opcion = menu_sombras.loop()
+            # Manejo de salida
+            if modo == "Salir" or modo is None:
+                break  # Salir del bucle principal
             
-            if opcion == "Jugador vs Boss IA":
-                juego_sombras()
+            # Iniciar modo seleccionado
+            if modo == "AJEDREZ CLÁSICO":
+                # CAMBIO 4: Usar fondo de menú clásico con modo="classic"
+                # Esto cargará la imagen /images/menu_classic.png
+                menu_clasico = Menu([
+                    "Jugador vs Jugador",
+                    "Partida LAN - Crear Servidor",
+                    "Partida LAN - Unirse a Servidor",
+                    "Jugador vs Máquina (Stockfish)",
+                    "Volver"
+                ], modo="classic")
+                opcion = menu_clasico.loop()
+                
+                if opcion == "Jugador vs Jugador":
+                    juego_local()
+                elif opcion == "Partida LAN - Crear Servidor":
+                    juego_lan_servidor()
+                elif opcion == "Partida LAN - Unirse a Servidor":
+                    juego_lan_cliente()
+                elif opcion == "Jugador vs Máquina (Stockfish)":
+                    juego_vs_maquina()
+                # Si opcion == "Volver" o None, el bucle continúa y vuelve al menú principal
+            
+            elif modo == "AJEDREZ SOMBRAS (RPG)":
+                # CAMBIO 5: Usar fondo de menú sombras con modo="soul"
+                # Esto cargará la imagen /images/menu_soul.png
+                menu_sombras = Menu([
+                    "Jugador vs Boss IA",
+                    "Volver"
+                ], modo="soul")
+                opcion = menu_sombras.loop()
+                
+                if opcion == "Jugador vs Boss IA":
+                    juego_sombras()
+                # Si opcion == "Volver" o None, el bucle continúa y vuelve al menú principal
             
     except pygame.error as e:
         print(f"Error de Pygame: {e}")
