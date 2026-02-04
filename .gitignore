@@ -48,6 +48,7 @@ stockfish-*.zip
 stockfish-*.tar
 stockfish-*.exe
 stockfish-*.tar.gz
+stockfish-windows-x86-64.exe
 
 # Game saves y temporales
 *.pgn.bak
